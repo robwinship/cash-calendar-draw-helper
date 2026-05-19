@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f0d09" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Cash Calendar Draw Helper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c96b;
+      --gold-dim: #7a6030;
+      --ink: #0f0d09;
+      --ink-soft: #1a1711;
+      --paper: #faf6ee;
+      --paper-dark: #f0e9d8;
+      --red: #c0392b;
+      --green: #1a6b3c;
+      --blue: #2e6de6;
+      --sp-xs: 6px;
+      --sp-sm: 12px;
+      --sp-md: 16px;
+      --sp-lg: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overscroll-behavior: none;
+      margin: 0;
+      background: radial-gradient(circle at 20% 0%, #262113, #0f0d09 60%);
+      color: var(--paper);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: var(--sp-md);
+      border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+      background: rgba(15, 13, 9, 0.75);
+      backdrop-filter: blur(4px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      font-size: 0.72rem;
+      border: 1px solid rgba(201, 168, 76, 0.5);
+      padding: 3px 8px;
+    }
+
+    h1 {
+      margin: 10px 0 0;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      line-height: 1.1;
+      font-weight: 900;
+    }
+
+    h1 span {
+      color: var(--gold-light);
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--sp-md);
+      padding-bottom: 108px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-md);
+    }
+
+    .card,
+    .history-section,
+    .result-section {
+      border: 1px solid rgba(201, 168, 76, 0.28);
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 4px;
+      padding: var(--sp-md);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-sm);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.86rem;
+      color: var(--paper-dark);
+    }
+
+    input[type="number"],
+    input[type="text"],
+    button,
+    .btn-csv {
+      min-height: 48px;
+      border-radius: 2px;
+      border: 1px solid rgba(201, 168, 76, 0.45);
+      background: rgba(15, 13, 9, 0.7);
+      color: var(--paper);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+    }
+
+    .pool-info,
+    .helper-line {
+      margin: 10px 0 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--paper-dark);
+    }
+
+    .section-header,
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-sm);
+    }
+
+    .excl-badge {
+      font-family: 'DM Mono', monospace;
+      color: var(--gold-light);
+      font-size: 0.74rem;
+      margin-left: 6px;
+    }
+
+    .tags-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-xs);
+      min-height: 40px;
+      padding: var(--sp-xs);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 2px;
+      margin-bottom: var(--sp-sm);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--gold-dim);
+      background: var(--ink);
+      color: var(--gold-light);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border-radius: 2px;
+    }
+
+    .tag button {
+      min-width: 28px;
+      min-height: 28px;
+      border: none;
+      background: none;
+      color: rgba(232, 201, 107, 0.55);
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .tag button:active {
+      color: var(--red);
+    }
+
+    .empty-msg {
+      color: rgba(250, 246, 238, 0.75);
+      font-size: 0.86rem;
+    }
+
+    .exclude-input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-sm);
+    }
+
+    .btn-add,
+    .btn-csv,
+    .btn-text,
+    .btn-text-danger,
+    .btn-delete-selected {
+      cursor: pointer;
+      padding: 8px 14px;
+      border: 1px solid rgba(201, 168, 76, 0.5);
+      color: var(--gold-light);
+      background: rgba(15, 13, 9, 0.8);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.92rem;
+    }
+
+    .btn-text,
+    .btn-text-danger,
+    .btn-delete-selected {
+      min-height: 40px;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-text-danger,
+    .btn-delete-selected {
+      color: #ff9f95;
+      border-color: rgba(192, 57, 43, 0.6);
+    }
+
+    .btn-delete-selected[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .csv-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .csv-feedback {
+      min-height: 18px;
+      margin: 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+    }
+
+    .csv-feedback.success {
+      color: var(--green);
+    }
+
+    .csv-feedback.error {
+      color: var(--red);
+    }
+
+    .reminder-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(201, 168, 76, 0.45);
+      background: rgba(201, 168, 76, 0.15);
+      border-radius: 2px;
+      padding: 12px 14px;
+      color: var(--gold-light);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .reminder-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .reminder-text {
+      flex: 1;
+    }
+
+    .reminder-dismiss {
+      min-width: 36px;
+      min-height: 36px;
+      border: none;
+      background: transparent;
+      color: rgba(232, 201, 107, 0.8);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .result-section {
+      text-align: center;
+      padding: var(--sp-lg) var(--sp-md);
+    }
+
+    .result-label {
+      margin: 0;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      color: var(--paper-dark);
+    }
+
+    .result-number {
+      margin-top: 8px;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(4.5rem, 26vw, 8.5rem);
+      font-weight: 900;
+      line-height: 1;
+      color: var(--paper);
+      min-height: 1em;
+    }
+
+    .result-number.spin {
+      animation: popIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.45) rotate(-8deg);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.08) rotate(2deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .result-sub,
+    .sync-status,
+    .error-msg {
+      margin: 10px 0 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.76rem;
+      color: var(--paper-dark);
+      min-height: 1.2em;
+    }
+
+    .error-msg {
+      color: #ff9f95;
+      margin: 0;
+      text-align: center;
+    }
+
+    .history-title {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      padding: 10px;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.14);
+    }
+
+    .history-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .history-main {
+      font-size: 0.95rem;
+      color: var(--paper);
+      line-height: 1.25;
+    }
+
+    .history-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--paper-dark);
+    }
+
+    .history-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .history-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-sm);
+      margin-top: var(--sp-sm);
+    }
+
+    .history-empty {
+      color: rgba(250, 246, 238, 0.75);
+      font-size: 0.86rem;
+      margin: 4px 0 0;
+    }
+
+    .draw-footer {
+      position: sticky;
+      bottom: 0;
+      background: rgba(15, 13, 9, 0.9);
+      border-top: 1px solid rgba(201, 168, 76, 0.2);
+      padding: var(--sp-sm) var(--sp-md);
+      padding-bottom: calc(var(--sp-sm) + env(safe-area-inset-bottom));
+      z-index: 10;
+    }
+
+    .btn-draw {
+      width: 100%;
+      height: 64px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      background: linear-gradient(180deg, rgba(28, 24, 16, 0.95), rgba(12, 10, 7, 0.95));
+      color: var(--gold-light);
+      border: 1px solid var(--gold);
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-draw:active {
+      transform: scale(0.98);
+    }
+
+    @media (min-width: 560px) {
+      body {
+        align-items: center;
+        background: radial-gradient(circle at 30% 0%, #2b2516, #0f0d09 65%);
+      }
+
+      header,
+      main,
+      .draw-footer {
+        width: min(680px, 100%);
+      }
+
+      main {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Fundraiser Tool</span>
+    <h1>Cash Calendar <span>Draw Helper</span></h1>
+  </header>
+
+  <main>
+    <div class="reminder-banner" id="reminderBanner">
+      <span class="reminder-icon">📱</span>
+      <span class="reminder-text">
+        Start your <strong>screen recording</strong> before drawing.
+      </span>
+      <button class="reminder-dismiss" type="button" id="reminderDismiss" aria-label="Dismiss reminder">✕</button>
+    </div>
+
+    <section class="card">
+      <div class="row">
+        <div class="field">
+          <label for="start">Start Number</label>
+          <input type="number" id="start" value="1" min="0" inputmode="numeric" pattern="[0-9]*" />
+        </div>
+        <div class="field">
+          <label for="end">End Number</label>
+          <input type="number" id="end" value="31" min="0" inputmode="numeric" pattern="[0-9]*" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top: 12px;">
+        <div class="field">
+          <label for="weekStartDate">Week Starting Date</label>
+          <input type="date" id="weekStartDate" />
+          <p class="helper-line">First day of your draw week (e.g., June 1st).</p>
+        </div>
+        <div class="field">
+          <label for="weekYear">Year</label>
+          <input type="number" id="weekYear" min="1900" max="2100" placeholder="2026" />
+          <p class="helper-line">Year for the draw dates.</p>
+        </div>
+      </div>
+
+      <p class="pool-info" id="poolInfo">-</p>
+      <p class="pool-info" id="weekInfo" style="margin-top: 12px; color: var(--gold-light);">—</p>
+    </section>
+
+    <section class="card">
+      <div class="section-header">
+        <label for="excludeInput">Unsold Calendars <span class="excl-badge" id="exclBadge"></span></label>
+      </div>
+
+      <div class="tags-wrap" id="tagsWrap">
+        <span class="empty-msg" id="emptyMsg">No exclusions - all numbers eligible.</span>
+      </div>
+
+      <div class="exclude-input-row">
+        <input type="number" id="excludeInput" placeholder="Add number" inputmode="numeric" pattern="[0-9]*" />
+        <button class="btn-add" type="button" id="addExclusionBtn">Add</button>
+      </div>
+
+      <div class="history-controls" style="margin-top: 0; margin-bottom: 10px;">
+        <button class="btn-text-danger" type="button" id="clearExclusionsBtn">Clear exclusions</button>
+      </div>
+
+      <div class="csv-row">
+        <label class="btn-csv" for="csvInput">Import CSV</label>
+        <input type="file" id="csvInput" accept=".csv,text/csv" style="display:none;" />
+        <p class="csv-feedback" id="csvFeedback"></p>
+      </div>
+    </section>
+
+    <section class="result-section" id="resultBox">
+      <p class="result-label">Winner</p>
+      <div class="result-number" id="resultNumber">?</div>
+      <p class="result-sub" id="resultSub">Tap Draw to begin</p>
+      <p class="sync-status" id="syncStatus"></p>
+    </section>
+
+    <p class="error-msg" id="errorMsg"></p>
+
+    <section class="history-section" id="historySection">
+      <div class="history-header">
+        <span class="history-title">Shared History</span>
+        <span class="history-sub" id="historyCount">0 records</span>
+      </div>
+      <div class="history-list" id="historyList"></div>
+      <p class="history-empty" id="historyEmpty">No draws yet.</p>
+      <div class="history-controls">
+        <label class="history-sub" for="selectAllHistory">Select all shown
+          <input type="checkbox" id="selectAllHistory" style="margin-left:6px; vertical-align:middle;" />
+        </label>
+        <button class="btn-delete-selected" type="button" id="deleteSelectedBtn" disabled>Delete selected</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="draw-footer">
+    <button class="btn-draw" id="drawBtn" type="button">Draw a Number</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script>
+    const KEYS = {
+      start: 'ccd_start',
+      end: 'ccd_end',
+      exclusions: 'ccd_exclusions',
+      reminderDismissed: 'ccd_reminder_dismissed',
+      localHistoryCache: 'ccd_history_cache',
+      weekStartDate: 'ccd_week_start_date',
+      weekYear: 'ccd_week_year',
+      drawCount: 'ccd_draw_count'
+    };
+
+    // Fill these values to enable cross-device history.
+    const firebaseConfig = {
+      apiKey: '',
+      authDomain: '',
+      projectId: '',
+      storageBucket: '',
+      messagingSenderId: '',
+      appId: ''
+    };
+
+    let exclusions = [];
+    let historyRecords = [];
+    let selectedHistoryIds = new Set();
+    let db = null;
+    let cloudEnabled = false;
+
+    const startEl = document.getElementById('start');
+    const endEl = document.getElementById('end');
+    const weekStartDateEl = document.getElementById('weekStartDate');
+    const weekYearEl = document.getElementById('weekYear');
+    const weekInfoEl = document.getElementById('weekInfo');
+    const excludeInputEl = document.getElementById('excludeInput');
+    const tagsWrapEl = document.getElementById('tagsWrap');
+    const emptyMsgEl = document.getElementById('emptyMsg');
+    const poolInfoEl = document.getElementById('poolInfo');
+    const exclBadgeEl = document.getElementById('exclBadge');
+    const resultNumberEl = document.getElementById('resultNumber');
+    const resultSubEl = document.getElementById('resultSub');
+    const errorMsgEl = document.getElementById('errorMsg');
+    const historyListEl = document.getElementById('historyList');
+    const historyEmptyEl = document.getElementById('historyEmpty');
+    const historyCountEl = document.getElementById('historyCount');
+    const deleteSelectedBtnEl = document.getElementById('deleteSelectedBtn');
+    const selectAllHistoryEl = document.getElementById('selectAllHistory');
+    const syncStatusEl = document.getElementById('syncStatus');
+    const reminderBannerEl = document.getElementById('reminderBanner');
+
+    function parseInteger(value) {
+      if (value === null || value === undefined || value === '') return NaN;
+      const n = Number(value);
+      if (!Number.isFinite(n) || !Number.isInteger(n)) return NaN;
+      return n;
+    }
+
+    function getWeekNumber(drawIndex) {
+      return Math.floor(drawIndex / 7) + 1;
+    }
+
+    function getDayName(date) {
+      return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+
+    function getDrawDateFromIndex(startDateStr, drawIndex) {
+      if (!startDateStr) return null;
+      try {
+        const start = new Date(startDateStr + 'T00:00:00');
+        const target = new Date(start);
+        target.setDate(target.getDate() + drawIndex);
+        return target;
+      } catch (_err) {
+        return null;
+      }
+    }
+
+    function generateDrawName() {
+      const startDate = weekStartDateEl.value;
+      const drawIndex = parseInt(localStorage.getItem(KEYS.drawCount) || '0', 10);
+
+      if (!startDate) {
+        return 'Draw ' + (drawIndex + 1);
+      }
+
+      const drawDate = getDrawDateFromIndex(startDate, drawIndex);
+      if (!drawDate) {
+        return 'Draw ' + (drawIndex + 1);
+      }
+
+      const week = getWeekNumber(drawIndex);
+      const dayStr = getDayName(drawDate);
+      return 'Week ' + week + ' - ' + dayStr;
+    }
+
+    function saveLocalState() {
+      localStorage.setItem(KEYS.start, startEl.value);
+      localStorage.setItem(KEYS.end, endEl.value);
+      localStorage.setItem(KEYS.exclusions, JSON.stringify(exclusions));
+      localStorage.setItem(KEYS.weekStartDate, weekStartDateEl.value);
+      localStorage.setItem(KEYS.weekYear, weekYearEl.value);
+    }
+
+    function loadLocalState() {
+      const start = localStorage.getItem(KEYS.start);
+      const end = localStorage.getItem(KEYS.end);
+      const savedExclusions = localStorage.getItem(KEYS.exclusions);
+      const savedStartDate = localStorage.getItem(KEYS.weekStartDate);
+      const savedYear = localStorage.getItem(KEYS.weekYear);
+
+      if (start !== null) startEl.value = start;
+      if (end !== null) endEl.value = end;
+      if (savedStartDate !== null) weekStartDateEl.value = savedStartDate;
+      if (savedYear !== null) weekYearEl.value = savedYear;
+
+      if (savedExclusions !== null) {
+        try {
+          const parsed = JSON.parse(savedExclusions);
+          exclusions = Array.isArray(parsed) ? parsed.filter(Number.isInteger) : [];
+        } catch (_err) {
+          exclusions = [];
+        }
+      }
+
+      exclusions.sort((a, b) => a - b);
+      updateWeekInfo();
+    }
+
+    function loadReminder() {
+      const dismissed = sessionStorage.getItem(KEYS.reminderDismissed);
+      if (dismissed === '1') {
+        reminderBannerEl.style.display = 'none';
+      }
+    }
+
+    function dismissReminder() {
+      reminderBannerEl.style.display = 'none';
+      sessionStorage.setItem(KEYS.reminderDismissed, '1');
+    }
+
+    function clearExclusions() {
+      const ok = confirm('Remove all excluded numbers? This cannot be undone.');
+      if (!ok) return;
+
+      exclusions = [];
+      saveLocalState();
+      renderTags();
+      updatePoolInfo();
+    }
+
+    function addExclusion(rawValue) {
+      const num = parseInteger(rawValue);
+      const start = parseInteger(startEl.value);
+      const end = parseInteger(endEl.value);
+
+      if (Number.isNaN(num)) return;
+      if (Number.isNaN(start) || Number.isNaN(end) || start > end) {
+        errorMsgEl.textContent = 'Set a valid range before adding exclusions.';
+        return;
+      }
+      if (num < start || num > end) {
+        errorMsgEl.textContent = 'Number must be between ' + start + ' and ' + end + '.';
+        return;
+      }
+      if (exclusions.includes(num)) {
+        return;
+      }
+
+      exclusions.push(num);
+      exclusions.sort((a, b) => a - b);
+      excludeInputEl.value = '';
+      errorMsgEl.textContent = '';
+      saveLocalState();
+      renderTags();
+      updatePoolInfo();
+    }
+
+    function removeExclusion(num) {
+      exclusions = exclusions.filter((n) => n !== num);
+      saveLocalState();
+      renderTags();
+      updatePoolInfo();
+    }
+
+    function renderTags() {
+      tagsWrapEl.innerHTML = '';
+      if (exclusions.length === 0) {
+        tagsWrapEl.appendChild(emptyMsgEl);
+        emptyMsgEl.style.display = 'inline';
+      } else {
+        emptyMsgEl.style.display = 'none';
+        exclusions.forEach((num) => {
+          const tag = document.createElement('span');
+          tag.className = 'tag';
+          tag.textContent = String(num);
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('aria-label', 'Remove ' + num);
+          btn.textContent = 'x';
+          btn.addEventListener('click', () => removeExclusion(num));
+
+          tag.appendChild(btn);
+          tagsWrapEl.appendChild(tag);
+        });
+      }
+
+      exclBadgeEl.textContent = exclusions.length > 0 ? exclusions.length + ' excluded' : '';
+    }
+
+    function buildPool(start, end, excluded) {
+      const pool = [];
+      for (let i = start; i <= end; i += 1) {
+        if (!excluded.includes(i)) pool.push(i);
+      }
+      return pool;
+    }
+
+    function validateRange(start, end) {
+      if (Number.isNaN(start) || Number.isNaN(end)) {
+        return 'Please enter valid start and end numbers.';
+      }
+      if (start > end) {
+        return 'Start must be less than or equal to end.';
+      }
+      if (start < 0 || end < 0) {
+        return 'Range values must be non-negative.';
+      }
+      if (end - start > 5000) {
+        return 'Range is too large. Keep range width at 5000 or less.';
+      }
+      return null;
+    }
+
+    function updatePoolInfo() {
+      const start = parseInteger(startEl.value);
+      const end = parseInteger(endEl.value);
+      const rangeErr = validateRange(start, end);
+      if (rangeErr) {
+        poolInfoEl.textContent = '-';
+        return;
+      }
+
+      const total = end - start + 1;
+      const pool = buildPool(start, end, exclusions);
+      poolInfoEl.textContent = pool.length + ' of ' + total + ' numbers eligible';
+    }
+
+    function showCSVFeedback(msg, type) {
+      const el = document.getElementById('csvFeedback');
+      el.textContent = msg;
+      el.className = 'csv-feedback ' + type;
+      setTimeout(() => {
+        el.textContent = '';
+        el.className = 'csv-feedback';
+      }, 5000);
+    }
+
+    function parseCSV(text) {
+      const start = parseInteger(startEl.value);
+      const end = parseInteger(endEl.value);
+      const rangeErr = validateRange(start, end);
+
+      if (rangeErr) {
+        showCSVFeedback('Set a valid range before importing CSV.', 'error');
+        return;
+      }
+
+      const cleaned = text.replace(/^\uFEFF/, '');
+      const tokens = cleaned
+        .split(/[\r\n,]+/)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+
+      let added = 0;
+      let skipped = 0;
+
+      tokens.forEach((token) => {
+        const num = parseInteger(token);
+        if (Number.isNaN(num)) return;
+        if (num < start || num > end) {
+          skipped += 1;
+          return;
+        }
+        if (exclusions.includes(num)) {
+          skipped += 1;
+          return;
+        }
+        exclusions.push(num);
+        added += 1;
+      });
+
+      exclusions.sort((a, b) => a - b);
+      saveLocalState();
+      renderTags();
+      updatePoolInfo();
+
+      if (added === 0 && skipped === 0) {
+        showCSVFeedback('No valid numbers found in the uploaded file.', 'error');
+        return;
+      }
+
+      const feedback = 'Imported ' + added + ' number' + (added !== 1 ? 's' : '') +
+        (skipped > 0 ? ' · ' + skipped + ' skipped' : '');
+      showCSVFeedback(feedback, 'success');
+    }
+
+    function handleCSVUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        parseCSV(String(e.target.result || ''));
+        event.target.value = '';
+      };
+      reader.onerror = () => {
+        showCSVFeedback('Could not read the file. Make sure it is a plain .csv.', 'error');
+      };
+      reader.readAsText(file);
+    }
+
+    function draw(pool) {
+      if (pool.length === 0) return null;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function makeRecord(winner, poolSize) {
+      const start = parseInteger(startEl.value);
+      const end = parseInteger(endEl.value);
+      const drawIndex = parseInt(localStorage.getItem(KEYS.drawCount) || '0', 10);
+      const created = new Date();
+      const week = getWeekNumber(drawIndex);
+      const drawName = generateDrawName();
+      return {
+        id: created.getTime().toString(36) + '-' + Math.random().toString(36).slice(2, 9),
+        drawName: drawName,
+        winnerNumber: winner,
+        createdAt: created.toISOString(),
+        rangeStart: start,
+        rangeEnd: end,
+        exclusionCount: exclusions.length,
+        poolSize: poolSize,
+        week: week,
+        drawIndex: drawIndex
+      };
+    }
+
+    function formatRecordDate(iso) {
+      try {
+        const dt = new Date(iso);
+        return dt.toLocaleString();
+      } catch (_err) {
+        return iso;
+      }
+    }
+
+    function sortRecordsNewest(records) {
+      return records.slice().sort((a, b) => {
+        const aTs = Date.parse(a.createdAt || 0);
+        const bTs = Date.parse(b.createdAt || 0);
+        return bTs - aTs;
+      });
+    }
+
+    function cacheHistoryLocally(records) {
+      localStorage.setItem(KEYS.localHistoryCache, JSON.stringify(records));
+    }
+
+    function loadLocalHistoryCache() {
+      const raw = localStorage.getItem(KEYS.localHistoryCache);
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_err) {
+        return [];
+      }
+    }
+
+    function updateWeekInfo() {
+      const startDate = weekStartDateEl.value;
+      const drawIndex = parseInt(localStorage.getItem(KEYS.drawCount) || '0', 10);
+      const week = getWeekNumber(drawIndex);
+      const dayInWeek = (drawIndex % 7) + 1;
+
+      if (!startDate) {
+        weekInfoEl.textContent = '—';
+        return;
+      }
+
+      const drawDate = getDrawDateFromIndex(startDate, drawIndex);
+      if (!drawDate) {
+        weekInfoEl.textContent = 'Week ' + week + ' · day ' + dayInWeek + ' of 7';
+      } else {
+        const dayStr = getDayName(drawDate);
+        weekInfoEl.textContent = 'Week ' + week + ' · next draw: ' + dayStr + ' (day ' + dayInWeek + ' of 7)';
+      }
+    }
+
+    function renderHistory() {
+      const records = sortRecordsNewest(historyRecords);
+      historyListEl.innerHTML = '';
+
+      records.forEach((rec) => {
+        const row = document.createElement('div');
+        row.className = 'history-row';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = selectedHistoryIds.has(rec.id);
+        cb.addEventListener('change', () => {
+          if (cb.checked) selectedHistoryIds.add(rec.id);
+          else selectedHistoryIds.delete(rec.id);
+          syncSelectionUi();
+        });
+
+        const meta = document.createElement('div');
+        meta.className = 'history-meta';
+
+        const main = document.createElement('div');
+        main.className = 'history-main';
+        main.textContent = (rec.drawName || 'Draw') + ' · winner #' + rec.winnerNumber;
+
+        const sub = document.createElement('div');
+        sub.className = 'history-sub';
+        sub.textContent = formatRecordDate(rec.createdAt) + ' · range ' + rec.rangeStart + '-' + rec.rangeEnd + ' · exclusions ' + rec.exclusionCount;
+
+        meta.appendChild(main);
+        meta.appendChild(sub);
+
+        row.appendChild(cb);
+        row.appendChild(meta);
+        historyListEl.appendChild(row);
+      });
+
+      historyCountEl.textContent = records.length + ' record' + (records.length !== 1 ? 's' : '');
+      historyEmptyEl.style.display = records.length === 0 ? 'block' : 'none';
+      syncSelectionUi();
+    }
+
+    function syncSelectionUi() {
+      const total = historyRecords.length;
+      deleteSelectedBtnEl.disabled = selectedHistoryIds.size === 0;
+      selectAllHistoryEl.checked = total > 0 && selectedHistoryIds.size === total;
+    }
+
+    function setSyncStatus(text, tone) {
+      syncStatusEl.textContent = text;
+      if (tone === 'error') syncStatusEl.style.color = '#ff9f95';
+      else if (tone === 'ok') syncStatusEl.style.color = '#9de1ad';
+      else syncStatusEl.style.color = 'var(--paper-dark)';
+    }
+
+    function validateRecord(record) {
+      return record &&
+        typeof record.id === 'string' &&
+        typeof record.drawName === 'string' &&
+        Number.isInteger(record.winnerNumber) &&
+        typeof record.createdAt === 'string';
+    }
+
+    function isFirebaseConfigured() {
+      return firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
+    }
+
+    function initCloud() {
+      if (!isFirebaseConfigured()) {
+        cloudEnabled = false;
+        setSyncStatus('Cloud sync not configured. Using local history cache.', 'warn');
+        return;
+      }
+
+      try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        cloudEnabled = true;
+        setSyncStatus('Cloud sync active.', 'ok');
+      } catch (err) {
+        cloudEnabled = false;
+        setSyncStatus('Cloud init failed. Using local history cache.', 'error');
+      }
+    }
+
+    async function loadHistory() {
+      if (!cloudEnabled || !db) {
+        historyRecords = sortRecordsNewest(loadLocalHistoryCache()).filter(validateRecord);
+        renderHistory();
+        return;
+      }
+
+      try {
+        setSyncStatus('Loading shared history...', 'warn');
+        const snap = await db.collection('drawHistory').orderBy('createdAt', 'desc').limit(500).get();
+        const records = [];
+        snap.forEach((doc) => {
+          const data = doc.data();
+          const rec = {
+            id: doc.id,
+            drawName: String(data.drawName || ''),
+            winnerNumber: Number(data.winnerNumber),
+            createdAt: String(data.createdAt || ''),
+            rangeStart: Number(data.rangeStart),
+            rangeEnd: Number(data.rangeEnd),
+            exclusionCount: Number(data.exclusionCount || 0),
+            poolSize: Number(data.poolSize || 0)
+          };
+          if (validateRecord(rec)) records.push(rec);
+        });
+
+        historyRecords = sortRecordsNewest(records);
+        cacheHistoryLocally(historyRecords);
+        renderHistory();
+        setSyncStatus('Shared history synced.', 'ok');
+      } catch (err) {
+        historyRecords = sortRecordsNewest(loadLocalHistoryCache()).filter(validateRecord);
+        renderHistory();
+        setSyncStatus('Cloud read failed. Showing local cache.', 'error');
+      }
+    }
+
+    async function saveHistoryRecord(record) {
+      if (!cloudEnabled || !db) {
+        historyRecords.unshift(record);
+        historyRecords = sortRecordsNewest(historyRecords).slice(0, 500);
+        cacheHistoryLocally(historyRecords);
+        renderHistory();
+        return;
+      }
+
+      try {
+        await db.collection('drawHistory').doc(record.id).set(record);
+        historyRecords.unshift(record);
+        historyRecords = sortRecordsNewest(historyRecords).slice(0, 500);
+        cacheHistoryLocally(historyRecords);
+        renderHistory();
+        setSyncStatus('Saved and synced.', 'ok');
+      } catch (err) {
+        historyRecords.unshift(record);
+        historyRecords = sortRecordsNewest(historyRecords).slice(0, 500);
+        cacheHistoryLocally(historyRecords);
+        renderHistory();
+        setSyncStatus('Cloud save failed. Saved locally only.', 'error');
+      }
+    }
+
+    async function deleteSelectedHistory() {
+      if (selectedHistoryIds.size === 0) return;
+
+      const count = selectedHistoryIds.size;
+      const approved = confirm('Delete ' + count + ' selected draw record' + (count > 1 ? 's' : '') + '? This cannot be undone.');
+      if (!approved) return;
+
+      const ids = Array.from(selectedHistoryIds);
+
+      if (cloudEnabled && db) {
+        try {
+          const batch = db.batch();
+          ids.forEach((id) => {
+            const ref = db.collection('drawHistory').doc(id);
+            batch.delete(ref);
+          });
+          await batch.commit();
+          setSyncStatus('Selected records deleted from shared history.', 'ok');
+        } catch (err) {
+          setSyncStatus('Cloud delete failed. No cloud records were removed.', 'error');
+        }
+      }
+
+      historyRecords = historyRecords.filter((rec) => !selectedHistoryIds.has(rec.id));
+      selectedHistoryIds.clear();
+      cacheHistoryLocally(historyRecords);
+      renderHistory();
+    }
+
+    async function handleDraw() {
+      const start = parseInteger(startEl.value);
+      const end = parseInteger(endEl.value);
+      const rangeErr = validateRange(start, end);
+
+      if (rangeErr) {
+        errorMsgEl.textContent = rangeErr;
+        return;
+      }
+
+      const pool = buildPool(start, end, exclusions);
+      if (pool.length === 0) {
+        errorMsgEl.textContent = 'No eligible numbers - all are excluded.';
+        return;
+      }
+
+      errorMsgEl.textContent = '';
+      const winner = draw(pool);
+      const record = makeRecord(winner, pool.length);
+
+      resultNumberEl.textContent = String(winner);
+      resultNumberEl.classList.remove('spin');
+      void resultNumberEl.offsetWidth;
+      resultNumberEl.classList.add('spin');
+
+      resultSubEl.textContent = 'Drawn from ' + pool.length + ' eligible number' + (pool.length !== 1 ? 's' : '') + '.';
+
+      // Increment draw count and update week info
+      const currentCount = parseInt(localStorage.getItem(KEYS.drawCount) || '0', 10);
+      localStorage.setItem(KEYS.drawCount, String(currentCount + 1));
+      updateWeekInfo();
+
+      await saveHistoryRecord(record);
+    }
+
+    function wireEvents() {
+      document.getElementById('drawBtn').addEventListener('click', handleDraw);
+      document.getElementById('addExclusionBtn').addEventListener('click', () => addExclusion(excludeInputEl.value));
+      document.getElementById('clearExclusionsBtn').addEventListener('click', clearExclusions);
+      document.getElementById('csvInput').addEventListener('change', handleCSVUpload);
+      document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedHistory);
+      document.getElementById('reminderDismiss').addEventListener('click', dismissReminder);
+
+      excludeInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          addExclusion(excludeInputEl.value);
+        }
+      });
+
+      excludeInputEl.addEventListener('input', (e) => {
+        if (e.target.value.includes(',')) {
+          e.target.value.split(',').forEach((v) => addExclusion(v.trim()));
+          e.target.value = '';
+        }
+      });
+
+      startEl.addEventListener('change', () => {
+        saveLocalState();
+        updatePoolInfo();
+      });
+
+      endEl.addEventListener('change', () => {
+        saveLocalState();
+        updatePoolInfo();
+      });
+
+      weekStartDateEl.addEventListener('change', () => {
+        saveLocalState();
+        updateWeekInfo();
+      });
+
+      weekYearEl.addEventListener('change', () => {
+        saveLocalState();
+      });
+
+      selectAllHistoryEl.addEventListener('change', () => {
+        if (selectAllHistoryEl.checked) {
+          selectedHistoryIds = new Set(historyRecords.map((r) => r.id));
+        } else {
+          selectedHistoryIds.clear();
+        }
+        renderHistory();
+      });
+    }
+
+    async function init() {
+      loadLocalState();
+      loadReminder();
+      initCloud();
+      renderTags();
+      updatePoolInfo();
+      updateWeekInfo();
+      wireEvents();
+      await loadHistory();
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
