@@ -1140,6 +1140,13 @@
       historyRecords = historyRecords.filter((rec) => !selectedHistoryIds.has(rec.id));
       selectedHistoryIds.clear();
       cacheHistoryLocally(historyRecords);
+      
+      // If all history records are deleted, reset the draw count to start fresh
+      if (historyRecords.length === 0) {
+        localStorage.removeItem(KEYS.drawCount);
+        updateWeekInfo();
+      }
+      
       renderHistory();
     }
 
