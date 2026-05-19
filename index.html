@@ -451,6 +451,47 @@
       transform: scale(0.98);
     }
 
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-sm);
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+    }
+
+    .collapsible-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      font-size: 1rem;
+      background: none;
+      border: none;
+      color: var(--gold-light);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .collapsible-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-content {
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      opacity: 1;
+    }
+
+    .collapsible-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
     @media (min-width: 560px) {
       body {
         align-items: center;
@@ -485,56 +526,66 @@
     </div>
 
     <section class="card">
-      <div class="row">
-        <div class="field">
-          <label for="start">Start Number</label>
-          <input type="number" id="start" value="1" min="0" inputmode="numeric" pattern="[0-9]*" />
-        </div>
-        <div class="field">
-          <label for="end">End Number</label>
-          <input type="number" id="end" value="31" min="0" inputmode="numeric" pattern="[0-9]*" />
-        </div>
+      <div class="collapsible-header" id="settingsHeaderBtn">
+        <button class="collapsible-toggle" id="settingsToggle" type="button">▼</button>
+        <label style="flex: 1; margin: 0; font-weight: 700; cursor: pointer;">Settings</label>
       </div>
 
-      <div class="row" style="margin-top: 12px;">
-        <div class="field">
-          <label for="weekStartDate">Week Starting Date</label>
-          <input type="date" id="weekStartDate" />
-          <p class="helper-line">First day of your draw week (e.g., June 1st).</p>
+      <div class="collapsible-content" id="settingsContent">
+        <div class="row" style="margin-top: 12px;">
+          <div class="field">
+            <label for="start">Start Number</label>
+            <input type="number" id="start" value="1" min="0" inputmode="numeric" pattern="[0-9]*" />
+          </div>
+          <div class="field">
+            <label for="end">End Number</label>
+            <input type="number" id="end" value="31" min="0" inputmode="numeric" pattern="[0-9]*" />
+          </div>
         </div>
-        <div class="field">
-          <label for="weekYear">Year</label>
-          <input type="number" id="weekYear" min="1900" max="2100" placeholder="2026" />
-          <p class="helper-line">Year for the draw dates.</p>
-        </div>
-      </div>
 
-      <p class="pool-info" id="poolInfo">-</p>
-      <p class="pool-info" id="weekInfo" style="margin-top: 12px; color: var(--gold-light);">—</p>
+        <div class="row" style="margin-top: 12px;">
+          <div class="field">
+            <label for="weekStartDate">Week Starting Date</label>
+            <input type="date" id="weekStartDate" />
+            <p class="helper-line">First day of your draw week (e.g., June 1st).</p>
+          </div>
+          <div class="field">
+            <label for="weekYear">Year</label>
+            <input type="number" id="weekYear" min="1900" max="2100" placeholder="2026" />
+            <p class="helper-line">Year for the draw dates.</p>
+          </div>
+        </div>
+
+        <p class="pool-info" id="poolInfo">-</p>
+        <p class="pool-info" id="weekInfo" style="margin-top: 12px; color: var(--gold-light);">—</p>
+      </div>
     </section>
 
     <section class="card">
-      <div class="section-header">
-        <label for="excludeInput">Unsold Calendars <span class="excl-badge" id="exclBadge"></span></label>
+      <div class="collapsible-header" id="exclusionsHeaderBtn">
+        <button class="collapsible-toggle" id="exclusionsToggle" type="button">▼</button>
+        <label style="flex: 1; margin: 0; font-weight: 700; cursor: pointer;">Unsold Calendars <span class="excl-badge" id="exclBadge"></span></label>
       </div>
 
-      <div class="tags-wrap" id="tagsWrap">
-        <span class="empty-msg" id="emptyMsg">No exclusions - all numbers eligible.</span>
-      </div>
+      <div class="collapsible-content" id="exclusionsContent">
+        <div class="tags-wrap" id="tagsWrap" style="margin-top: 12px;">
+          <span class="empty-msg" id="emptyMsg">No exclusions - all numbers eligible.</span>
+        </div>
 
-      <div class="exclude-input-row">
-        <input type="number" id="excludeInput" placeholder="Add number" inputmode="numeric" pattern="[0-9]*" />
-        <button class="btn-add" type="button" id="addExclusionBtn">Add</button>
-      </div>
+        <div class="exclude-input-row">
+          <input type="number" id="excludeInput" placeholder="Add number" inputmode="numeric" pattern="[0-9]*" />
+          <button class="btn-add" type="button" id="addExclusionBtn">Add</button>
+        </div>
 
-      <div class="history-controls" style="margin-top: 0; margin-bottom: 10px;">
-        <button class="btn-text-danger" type="button" id="clearExclusionsBtn">Clear exclusions</button>
-      </div>
+        <div class="history-controls" style="margin-top: 0; margin-bottom: 10px;">
+          <button class="btn-text-danger" type="button" id="clearExclusionsBtn">Clear exclusions</button>
+        </div>
 
-      <div class="csv-row">
-        <label class="btn-csv" for="csvInput">Import CSV</label>
-        <input type="file" id="csvInput" accept=".csv,text/csv" style="display:none;" />
-        <p class="csv-feedback" id="csvFeedback"></p>
+        <div class="csv-row">
+          <label class="btn-csv" for="csvInput">Import CSV</label>
+          <input type="file" id="csvInput" accept=".csv,text/csv" style="display:none;" />
+          <p class="csv-feedback" id="csvFeedback"></p>
+        </div>
       </div>
     </section>
 
@@ -548,17 +599,20 @@
     <p class="error-msg" id="errorMsg"></p>
 
     <section class="history-section" id="historySection">
-      <div class="history-header">
-        <span class="history-title">Shared History</span>
-        <span class="history-sub" id="historyCount">0 records</span>
+      <div class="collapsible-header" id="historyHeaderBtn">
+        <button class="collapsible-toggle" id="historyToggle" type="button">▼</button>
+        <label style="flex: 1; margin: 0; font-weight: 700; cursor: pointer;">Shared History <span class="history-sub" id="historyCount">0 records</span></label>
       </div>
-      <div class="history-list" id="historyList"></div>
-      <p class="history-empty" id="historyEmpty">No draws yet.</p>
-      <div class="history-controls">
-        <label class="history-sub" for="selectAllHistory">Select all shown
-          <input type="checkbox" id="selectAllHistory" style="margin-left:6px; vertical-align:middle;" />
-        </label>
-        <button class="btn-delete-selected" type="button" id="deleteSelectedBtn" disabled>Delete selected</button>
+
+      <div class="collapsible-content" id="historyContent">
+        <div class="history-list" id="historyList" style="margin-top: 12px;"></div>
+        <p class="history-empty" id="historyEmpty">No draws yet.</p>
+        <div class="history-controls">
+          <label class="history-sub" for="selectAllHistory">Select all shown
+            <input type="checkbox" id="selectAllHistory" style="margin-left:6px; vertical-align:middle;" />
+          </label>
+          <button class="btn-delete-selected" type="button" id="deleteSelectedBtn" disabled>Delete selected</button>
+        </div>
       </div>
     </section>
   </main>
@@ -1207,6 +1261,40 @@
       document.getElementById('csvInput').addEventListener('change', handleCSVUpload);
       document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedHistory);
       document.getElementById('reminderDismiss').addEventListener('click', dismissReminder);
+
+      // Collapsible sections
+      const settingsToggle = document.getElementById('settingsToggle');
+      const settingsContent = document.getElementById('settingsContent');
+      const settingsHeaderBtn = document.getElementById('settingsHeaderBtn');
+
+      const exclusionsToggle = document.getElementById('exclusionsToggle');
+      const exclusionsContent = document.getElementById('exclusionsContent');
+      const exclusionsHeaderBtn = document.getElementById('exclusionsHeaderBtn');
+
+      const historyToggle = document.getElementById('historyToggle');
+      const historyContent = document.getElementById('historyContent');
+      const historyHeaderBtn = document.getElementById('historyHeaderBtn');
+
+      function toggleCollapsible(toggle, content) {
+        return function () {
+          content.classList.toggle('collapsed');
+          toggle.classList.toggle('collapsed');
+        };
+      }
+
+      settingsHeaderBtn.addEventListener('click', toggleCollapsible(settingsToggle, settingsContent));
+      exclusionsHeaderBtn.addEventListener('click', toggleCollapsible(exclusionsToggle, exclusionsContent));
+      historyHeaderBtn.addEventListener('click', toggleCollapsible(historyToggle, historyContent));
+
+      // Collapse settings and exclusions by default on load (optional)
+      // settingsContent.classList.add('collapsed');
+      // settingsToggle.classList.add('collapsed');
+      // exclusionsContent.classList.add('collapsed');
+      // exclusionsToggle.classList.add('collapsed');
+
+      // Collapse history by default
+      historyContent.classList.add('collapsed');
+      historyToggle.classList.add('collapsed');
 
       excludeInputEl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
