@@ -1153,6 +1153,21 @@
         return;
       }
 
+      // Check if starting a new week (hard stop after 7 draws)
+      const drawIndex = parseInt(localStorage.getItem(KEYS.drawCount) || '0', 10);
+      if (drawIndex > 0 && drawIndex % 7 === 0) {
+        const currentWeek = getWeekNumber(drawIndex - 1);
+        const nextWeek = getWeekNumber(drawIndex);
+        const confirmed = confirm(
+          'Week ' + currentWeek + ' is complete with 7 draws.\n\n' +
+          'Do you want to proceed to Week ' + nextWeek + ' draws?\n\n' +
+          'Click OK to continue, or Cancel to stop.'
+        );
+        if (!confirmed) {
+          return;
+        }
+      }
+
       const pool = buildPool(start, end, exclusions);
       if (pool.length === 0) {
         errorMsgEl.textContent = 'No eligible numbers - all are excluded.';
